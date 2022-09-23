@@ -1,0 +1,30 @@
+name: Synchonize OpenCV version
+
+on:
+  schedule:
+    - cron: '6 3 * * *'
+  
+  workflow_dispatch:
+
+jobs:
+  synchronize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.PUSH_TO_OPENCV_SPM }}
+      
+      - name: Fetch OpenCV latest version
+        run: |
+          curl -s https://api.github.com/repos/opencv/opencv/releases/latest | jq -r '.tag_name' > .version
+
+      - name: Commit changes
+        run: |
+          if [[ -n $(git status --porcelain) ]]; then
+            git config --local user.email "github-actions[bot]@users.noreply.github.com"
+            git config --local user.name "GitHub Actions"
+            git add .version
+            git commit -m "Update OpenCV version to $(cat .version)"
+            git push
+          fi

@@ -1,0 +1,82 @@
+name: Build and release a new version
+
+on:
+  push:
+    branches: [ "main" ]
+    paths: [ ".version" ]
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macOS-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          path: opencv-spm
+
+      - name: Get version
+        id: get_version
+        working-directory: opencv-spm
+        run: echo ::set-output name=VERSION::$(cat .version)
+
+      - name: Checkout OpenCV
+        uses: actions/checkout@v3
+        with:
+          repository: opencv/opencv
+          ref: refs/tags/${{ steps.get_version.outputs.VERSION }}
+          path: 'opencv'
+          
+      - name: Build xcframework
+        working-directory: opencv
+        run: |
+          pip3 install pathlib
+          python3 platforms/apple/build_xcframework.py -o build
+        
+      - name: Zip artifact
+        working-directory: opencv
+        run: zip -r opencv2.xcframework.zip build/opencv2.xcframework
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: opencv2.xcframework.zip
+          path: opencv/opencv2.xcframework.zip
+          if-no-files-found: error
+          
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: opencv2.xcframework.zip
+
+      - name: Get version
+        id: get_version
+        run: echo ::set-output name=VERSION::$(cat .version)
+
+      - name: Update Package.swift
+        run: |
+          sed -i "s/let version = \".*\"/let version = \"${{ steps.get_version.outputs.VERSION }}\"/" Package.swift
+          sed -i "s/let checksum = \".*\"/let checksum = \"$(shasum -a 256 opencv2.xcframework.zip | cut -d ' ' -f 1)\"/" Package.swift
+
+      - name: Commit and push
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "GitHub Actions"
+          git add Package.swift
+          git commit -m "Update Package.swift"
+          git push
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: opencv2.xcframework.zip
+          tag_name: ${{ steps.get_version.outputs.VERSION }}
