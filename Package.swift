@@ -3,13 +3,13 @@
 
 import PackageDescription
 
-let version = "4.6.0"
+let version = "0.0.0"
 let checksum = ""
 
 let package = Package(
     name: "OpenCV",
     platforms: [
-        .macOS(.v10_14), .iOS(.v13), .tvOS(.v13)
+        .macOS(.v10_13), .iOS(.v11), .macCatalyst(.v13)
     ],
     products: [
         .library(
@@ -19,6 +19,6 @@ let package = Package(
     targets: [
         .binaryTarget(name: "opencv2",
                       url: "https://github.com/Yeatse/OpenCV-SPM/releases/download/\(version)/opencv2.xcframework.zip",
-                      checksum: checksum)
+                      checksum: checksum),
     ]
 )
