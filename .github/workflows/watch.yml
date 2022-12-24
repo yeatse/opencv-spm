@@ -21,6 +21,10 @@ jobs:
 
       - name: Commit changes
         run: |
+          if [[ "$(cat .version)" == "null" ]]; then
+            echo "version is null"
+            exit 1
+          fi
           if [[ -n $(git status --porcelain) ]]; then
             git config --local user.email "github-actions[bot]@users.noreply.github.com"
             git config --local user.name "GitHub Actions"
