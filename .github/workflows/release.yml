@@ -38,7 +38,7 @@ jobs:
         working-directory: opencv
         run: |
           pip3 install pathlib
-          python3 platforms/apple/build_xcframework.py -o build
+          python3 platforms/apple/build_xcframework.py --disable-bitcode -o build
         
       - name: Zip artifact
         working-directory: opencv
