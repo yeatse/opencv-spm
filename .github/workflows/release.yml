@@ -12,6 +12,11 @@ jobs:
     runs-on: macOS-latest
 
     steps:
+      - name: actions-setup-cmake
+        uses: jwlawson/actions-setup-cmake@v1.13.1
+        with:
+          cmake-version: 3.24
+
       - name: Checkout
         uses: actions/checkout@v3
         with:
@@ -20,7 +25,7 @@ jobs:
       - name: Get version
         id: get_version
         working-directory: opencv-spm
-        run: echo ::set-output name=VERSION::$(cat .version)
+        run: echo "VERSION=$(cat .version)" >> $GITHUB_OUTPUT
 
       - name: Checkout OpenCV
         uses: actions/checkout@v3
@@ -60,7 +65,7 @@ jobs:
 
       - name: Get version
         id: get_version
-        run: echo ::set-output name=VERSION::$(cat .version)
+        run: echo "VERSION=$(cat .version)" >> $GITHUB_OUTPUT
 
       - name: Update Package.swift
         run: |
