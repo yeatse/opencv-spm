@@ -6,7 +6,7 @@ This swift package helps you easily import the prebuilt `opencv2.xcframework` in
 
 ## Installation
 
-1. Add `https://github.com/Yeatse/OpenCV-SPM.git` to your package dependencies.
+1. Add `https://github.com/yeatse/opencv-spm.git` to your package dependencies.
 
     ![add dependency](screenshots/add%20dependency.png)
 
