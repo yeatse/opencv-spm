@@ -1,0 +1,49 @@
+name: Build OpenCV xcframework
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  build:
+    runs-on: macOS-latest
+
+    steps:
+      - name: actions-setup-cmake
+        uses: jwlawson/actions-setup-cmake@v1.13.1
+        with:
+          cmake-version: 3.24
+
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          path: opencv-spm
+
+      - name: Get version
+        id: get_version
+        working-directory: opencv-spm
+        run: echo "VERSION=$(cat .version)" >> $GITHUB_OUTPUT
+
+      - name: Checkout OpenCV
+        uses: actions/checkout@v3
+        with:
+          repository: opencv/opencv
+          ref: refs/tags/${{ steps.get_version.outputs.VERSION }}
+          path: 'opencv'
+      
+      - name: Build xcframework
+        working-directory: opencv
+        run: |
+          pip3 install pathlib
+          python3 platforms/apple/build_xcframework.py --disable-bitcode -o build
+
+      - name: Zip artifact
+        working-directory: opencv
+        run: zip -r opencv2.xcframework.zip build/opencv2.xcframework
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: opencv2.xcframework.zip
+          path: opencv/opencv2.xcframework.zip
+          if-no-files-found: error
