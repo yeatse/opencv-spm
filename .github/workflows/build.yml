@@ -33,6 +33,9 @@ jobs:
       
       - name: Build xcframework
         working-directory: opencv
+        env:
+          IPHONEOS_DEPLOYMENT_TARGET: 11.0
+          MACOSX_DEPLOYMENT_TARGET: 10.13
         run: |
           pip3 install pathlib
           python3 platforms/apple/build_xcframework.py --iphoneos_archs=arm64 --disable-bitcode -o build
