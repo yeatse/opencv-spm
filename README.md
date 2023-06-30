@@ -2,7 +2,7 @@
 
 Use [OpenCV](https://github.com/opencv/opencv) in your Swift project in a more elegant way.
 
-This swift package helps you easily import the prebuilt `opencv2.xcframework` into your project, so you no longer need to build it by yourself. It watches the release events in [OpenCV Github Project](https://github.com/opencv/opencv) and automatically creates new releases, using the powerful [Github Actions](https://github.com/features/actions).
+This Swift package simplifies the process of importing the prebuilt `opencv2.xcframework` into your project, eliminating the need for manual building. It monitors release events in the [OpenCV Github Project](https://github.com/opencv/opencv) and automatically generates new releases using [Github Actions](https://github.com/features/actions).
 
 ## Installation
 
