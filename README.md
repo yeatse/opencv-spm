@@ -10,11 +10,7 @@ This swift package helps you easily import the prebuilt `opencv2.xcframework` in
 
     ![add dependency](screenshots/add%20dependency.png)
 
-2. Add `libc++` to your linked libraries, otherwise building will fail.
-
-    ![add libc++](screenshots/add%20libcxx.png)
-
-3. Add `-all_load` to `Other Linker Flags`, otherwise some methods cannot be used. [opencv/opencv#17532](https://github.com/opencv/opencv/issues/17532)
+2. Add `-all_load` to `Other Linker Flags`, otherwise some methods cannot be used. [opencv/opencv#17532](https://github.com/opencv/opencv/issues/17532)
 
     ![add linker flags](screenshots/add%20linker%20flags.png)
 
