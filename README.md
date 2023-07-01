@@ -6,13 +6,9 @@ This Swift package simplifies the process of importing the prebuilt `opencv2.xcf
 
 ## Installation
 
-1. Add `https://github.com/yeatse/opencv-spm.git` to your package dependencies.
+Add `https://github.com/yeatse/opencv-spm.git` to your package dependencies
 
-    ![add dependency](screenshots/add%20dependency.png)
-
-2. Add `-all_load` to `Other Linker Flags`, otherwise some methods cannot be used. [opencv/opencv#17532](https://github.com/opencv/opencv/issues/17532)
-
-    ![add linker flags](screenshots/add%20linker%20flags.png)
+![add dependency](screenshots/add%20dependency.png)
 
 ## Usage
 
