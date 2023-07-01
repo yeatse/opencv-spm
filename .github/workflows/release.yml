@@ -25,7 +25,13 @@ jobs:
 
       - name: Get version
         id: get_version
-        run: echo "VERSION=$(cat .version)" >> $GITHUB_OUTPUT
+        run: |
+          VERSION=$(cat .version)
+          if git rev-parse -q --verify "refs/tags/${VERSION}" >/dev/null; then
+            PATCH=$(git rev-list --count "refs/tags/${VERSION}..HEAD")
+            VERSION="${VERSION}+${PATCH}"
+          fi
+          echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
 
       - name: Update Package.swift
         run: |

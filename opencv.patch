@@ -1,0 +1,42 @@
+diff --git a/platforms/ios/build_framework.py b/platforms/ios/build_framework.py
+index 77878280f7..435eb89c8c 100755
+--- a/platforms/ios/build_framework.py
++++ b/platforms/ios/build_framework.py
+@@ -426,6 +426,12 @@ class Builder:
+                         file.write(body)
+         if self.build_objc_wrapper:
+             copy_tree(os.path.join(builddirs[0], "install", "lib", name + ".framework", "Headers"), os.path.join(dstdir, "Headers"))
++            module_header = os.path.join(dstdir, "Headers", name + "-Swift.h")
++            if os.path.isfile(module_header):
++                for d in builddirs[1:]:
++                    header_to_merge = os.path.join(d, "install", "lib", name + ".framework", "Headers", name + "-Swift.h")
++                    self.mergeModuleHeaders(module_header, header_to_merge)
++
+             platform_name_map = {
+                     "arm": "armv7-apple-ios",
+                     "arm64": "arm64-apple-ios",
+@@ -478,6 +484,24 @@ class Builder:
+                 d = os.path.join(framework_dir, *l[1])
+                 os.symlink(s, d)
+ 
++    def mergeModuleHeaders(self, merged_header, module_header):
++        print("Merging module headers:\n\t%s\n\t%s" % (merged_header, module_header))
++        with codecs.open(merged_header, "r", "utf-8") as file:
++            merged_lines = file.readlines()
++
++        for i in range(len(merged_lines)):
++            if merged_lines[i].find("#error unsupported Swift architecture") != -1:
++                merged_lines = merged_lines[:i-1]
++                break
++
++        with codecs.open(module_header, "r", "utf-8") as file:
++            module_lines = file.readlines()
++
++        merged_lines.extend(module_lines[1:])
++
++        with codecs.open(merged_header, "w", "utf-8") as file:
++            file.writelines(merged_lines)
++
+     def copy_samples(self, outdir):
+         return
+ 
