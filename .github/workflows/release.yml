@@ -1,5 +1,8 @@
 name: Build and release a new version
-
+permissions:
+  pull-requests: write
+  issues: write
+  repository-projects: write
 on:
   push:
     branches: [ "main" ]
@@ -41,8 +44,6 @@ jobs:
           sed -i "s/let checksum = \".*\"/let checksum = \"$(shasum -a 256 opencv2.xcframework.zip | cut -d ' ' -f 1)\"/" Package.swift
 
       - name: Commit and push
-        env:
-          ACCESS_TOKEN: '${{ secrets.ACCESS_TOKEN }}'
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "GitHub Actions"
