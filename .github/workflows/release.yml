@@ -45,13 +45,13 @@ jobs:
           sed -i "s/let version = \".*\"/let version = \"${{ steps.get_version.outputs.VERSION }}\"/" Package.swift
           sed -i "s/let checksum = \".*\"/let checksum = \"$(shasum -a 256 opencv2.xcframework.zip | cut -d ' ' -f 1)\"/" Package.swift
 
-      - name: Commit and push
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "GitHub Actions"
-          git add Package.swift
-          git commit -m "Update Package.swift"
-          git push
+      # - name: Commit and push
+      #   run: |
+      #     git config --local user.email "github-actions[bot]@users.noreply.github.com"
+      #     git config --local user.name "GitHub Actions"
+      #     git add Package.swift
+      #     git commit -m "Update Package.swift"
+      #     git push
 
       - name: Release
         uses: softprops/action-gh-release@v1
