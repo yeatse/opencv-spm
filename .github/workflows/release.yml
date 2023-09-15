@@ -3,6 +3,8 @@ permissions:
   pull-requests: write
   issues: write
   repository-projects: write
+  contents: write
+  packages: write
 on:
   push:
     branches: [ "main" ]
