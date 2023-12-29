@@ -1,4 +1,4 @@
-// swift-tools-version: 5.7
+// swift-tools-version: 5.9
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -9,7 +9,7 @@ let checksum = "ce65a8379a4d7428e2c09a8658110015d8f5ded79c15e3aa3b512f14bc85b7dd
 let package = Package(
     name: "OpenCV",
     platforms: [
-        .macOS(.v10_13), .iOS(.v11), .macCatalyst(.v13)
+        .iOS(.v12), .macOS(.v10_13), .macCatalyst(.v13), .visionOS(.v1)
     ],
     products: [
         .library(
