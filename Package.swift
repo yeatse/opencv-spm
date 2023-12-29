@@ -26,8 +26,8 @@ let package = Package(
                 .linkedFramework("AVFoundation"),
                 .linkedFramework("CoreImage"),
                 .linkedFramework("CoreMedia"),
-                .linkedFramework("CoreVideo", .when(platforms: [.iOS])),
-                .linkedFramework("Accelerate", .when(platforms: [.iOS, .macOS])),
+                .linkedFramework("CoreVideo", .when(platforms: [.iOS, .visionOS])),
+                .linkedFramework("Accelerate", .when(platforms: [.iOS, .macOS, .visionOS])),
                 .linkedFramework("OpenCL", .when(platforms: [.macOS])),
                 .linkedLibrary("c++")
             ]
