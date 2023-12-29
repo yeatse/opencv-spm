@@ -45,7 +45,7 @@ jobs:
           python3 platforms/apple/build_xcframework.py \
               --iphoneos_archs=arm64 \
               --visionos_archs=arm64 \
-              --visionsimulator_archs=arm64 \
+              --visionsimulator_archs=x86_64,arm64 \
               --disable-bitcode -o build
 
       - name: Zip artifact
