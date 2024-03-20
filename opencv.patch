@@ -1,5 +1,18 @@
+diff --git a/platforms/ios/Info.plist.in b/platforms/ios/Info.plist.in
+index a166934bdf..fa70c29349 100644
+--- a/platforms/ios/Info.plist.in
++++ b/platforms/ios/Info.plist.in
+@@ -2,6 +2,8 @@
+ <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+ <plist version="1.0">
+ <dict>
++    <key>CFBundleExecutable</key>
++    <string>opencv2</string>
+     <key>CFBundleName</key>
+     <string>${OPENCV_APPLE_BUNDLE_NAME}</string>
+     <key>CFBundleIdentifier</key>
 diff --git a/platforms/ios/build_framework.py b/platforms/ios/build_framework.py
-index 77878280f7..435eb89c8c 100755
+index b876812720..efc929bfed 100755
 --- a/platforms/ios/build_framework.py
 +++ b/platforms/ios/build_framework.py
 @@ -426,6 +426,12 @@ class Builder:
@@ -15,10 +28,21 @@ index 77878280f7..435eb89c8c 100755
              platform_name_map = {
                      "arm": "armv7-apple-ios",
                      "arm64": "arm64-apple-ios",
-@@ -478,6 +484,24 @@ class Builder:
+@@ -478,6 +484,35 @@ class Builder:
                  d = os.path.join(framework_dir, *l[1])
                  os.symlink(s, d)
  
++            # Fix build failure on Xcode 15.3
++            root_plist = '''<?xml version="1.0" encoding="UTF-8"?>
++<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
++<plist version="1.0">
++    <dict></dict>
++</plist>
++'''
++            root_plist_path = os.path.join(framework_dir, 'Info.plist')
++            with open(root_plist_path, 'w') as root_plist_file:
++                root_plist_file.write(root_plist)
++
 +    def mergeModuleHeaders(self, merged_header, module_header):
 +        print("Merging module headers:\n\t%s\n\t%s" % (merged_header, module_header))
 +        with codecs.open(merged_header, "r", "utf-8") as file:
