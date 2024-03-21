@@ -6,12 +6,12 @@ on:
 
 jobs:
   build:
-    runs-on: macos-13
+    runs-on: macos-14
 
     steps:
       - name: Prepare Xcode
         run: |
-          sudo xcode-select -s /Applications/Xcode_15.1.app/Contents/Developer
+          sudo xcode-select -s /Applications/Xcode_15.2.app/Contents/Developer
 
       - name: actions-setup-cmake
         uses: jwlawson/actions-setup-cmake@v1.13.1
@@ -45,6 +45,8 @@ jobs:
           pip3 install pathlib
           python3 platforms/apple/build_xcframework.py \
               --iphoneos_archs=arm64 \
+              --visionos_archs=arm64 \
+              --visionsimulator_archs=x86_64,arm64 \
               --disable-bitcode -o build
 
       - name: Zip artifact

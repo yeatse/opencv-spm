@@ -1,4 +1,4 @@
-// swift-tools-version: 5.7
+// swift-tools-version: 5.9
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -9,7 +9,7 @@ let checksum = "9109ce819eb9c62eafee160b274c74182430aae16774bcc54d4ad25aec9fddf2
 let package = Package(
     name: "OpenCV",
     platforms: [
-        .macOS(.v10_13), .iOS(.v12), .macCatalyst(.v13)
+        .macOS(.v10_13), .iOS(.v12), .macCatalyst(.v13), .visionOS(.v1)
     ],
     products: [
         .library(
@@ -26,8 +26,8 @@ let package = Package(
                 .linkedFramework("AVFoundation"),
                 .linkedFramework("CoreImage"),
                 .linkedFramework("CoreMedia"),
-                .linkedFramework("CoreVideo", .when(platforms: [.iOS])),
-                .linkedFramework("Accelerate", .when(platforms: [.iOS, .macOS])),
+                .linkedFramework("CoreVideo", .when(platforms: [.iOS, .visionOS])),
+                .linkedFramework("Accelerate", .when(platforms: [.iOS, .macOS, .visionOS])),
                 .linkedFramework("OpenCL", .when(platforms: [.macOS])),
                 .linkedLibrary("c++")
             ]
