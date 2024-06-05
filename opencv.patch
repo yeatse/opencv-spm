@@ -14,10 +14,10 @@ index a166934bdf..76ab8fda4f 100644
      <string>${OPENCV_APPLE_BUNDLE_NAME}</string>
      <key>CFBundleIdentifier</key>
 diff --git a/platforms/ios/build_framework.py b/platforms/ios/build_framework.py
-index b876812720..6b05fcbb9e 100755
+index 1904a67ae7..04b5408242 100755
 --- a/platforms/ios/build_framework.py
 +++ b/platforms/ios/build_framework.py
-@@ -407,7 +407,7 @@ class Builder:
+@@ -410,7 +410,7 @@ class Builder:
              shutil.rmtree(framework_dir)
          os.makedirs(framework_dir)
  
@@ -26,7 +26,7 @@ index b876812720..6b05fcbb9e 100755
              dstdir = framework_dir
          else:
              dstdir = os.path.join(framework_dir, "Versions", "A")
-@@ -426,6 +426,12 @@ class Builder:
+@@ -429,6 +429,12 @@ class Builder:
                          file.write(body)
          if self.build_objc_wrapper:
              copy_tree(os.path.join(builddirs[0], "install", "lib", name + ".framework", "Headers"), os.path.join(dstdir, "Headers"))
@@ -39,7 +39,7 @@ index b876812720..6b05fcbb9e 100755
              platform_name_map = {
                      "arm": "armv7-apple-ios",
                      "arm64": "arm64-apple-ios",
-@@ -456,7 +462,7 @@ class Builder:
+@@ -459,7 +465,7 @@ class Builder:
          execute(lipocmd)
  
          # dynamic framework has different structure, just copy the Plist directly
@@ -48,9 +48,9 @@ index b876812720..6b05fcbb9e 100755
              resdir = dstdir
              shutil.copyfile(self.getInfoPlist(builddirs), os.path.join(resdir, "Info.plist"))
          else:
-@@ -478,6 +484,24 @@ class Builder:
-                 d = os.path.join(framework_dir, *l[1])
-                 os.symlink(s, d)
+@@ -484,6 +490,24 @@ class Builder:
+         shutil.copyfile(os.path.join(CURRENT_FILE_DIR, "PrivacyInfo.xcprivacy"),
+                         os.path.join(resdir, "PrivacyInfo.xcprivacy"))
  
 +    def mergeModuleHeaders(self, merged_header, module_header):
 +        print("Merging module headers:\n\t%s\n\t%s" % (merged_header, module_header))
