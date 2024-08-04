@@ -1,31 +1,7 @@
-diff --git a/platforms/ios/Info.plist.in b/platforms/ios/Info.plist.in
-index a166934bdf..76ab8fda4f 100644
---- a/platforms/ios/Info.plist.in
-+++ b/platforms/ios/Info.plist.in
-@@ -2,6 +2,10 @@
- <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
- <plist version="1.0">
- <dict>
-+    <key>CFBundleExecutable</key>
-+    <string>opencv2</string>
-+    <key>MinimumOSVersion</key>
-+    <string>100.0</string>
-     <key>CFBundleName</key>
-     <string>${OPENCV_APPLE_BUNDLE_NAME}</string>
-     <key>CFBundleIdentifier</key>
-diff --git a/platforms/ios/build_framework.py b/platforms/ios/build_framework.py
-index 1904a67ae7..04b5408242 100755
---- a/platforms/ios/build_framework.py
-+++ b/platforms/ios/build_framework.py
-@@ -410,7 +410,7 @@ class Builder:
-             shutil.rmtree(framework_dir)
-         os.makedirs(framework_dir)
- 
--        if self.dynamic:
-+        if self.dynamic or builddirs[0].find("iphone") != -1 or builddirs[0].find("vision") != -1:
-             dstdir = framework_dir
-         else:
-             dstdir = os.path.join(framework_dir, "Versions", "A")
+diff --git forkSrcPrefix/platforms/ios/build_framework.py forkDstPrefix/platforms/ios/build_framework.py
+index 1904a67ae7c9709f8bced3fb3600c1b8662c306d..b59eef1e03d8ef6b7920df7159b9fd0e0aafbdee 100755
+--- forkSrcPrefix/platforms/ios/build_framework.py
++++ forkDstPrefix/platforms/ios/build_framework.py
 @@ -429,6 +429,12 @@ class Builder:
                          file.write(body)
          if self.build_objc_wrapper:
@@ -39,15 +15,6 @@ index 1904a67ae7..04b5408242 100755
              platform_name_map = {
                      "arm": "armv7-apple-ios",
                      "arm64": "arm64-apple-ios",
-@@ -459,7 +465,7 @@ class Builder:
-         execute(lipocmd)
- 
-         # dynamic framework has different structure, just copy the Plist directly
--        if self.dynamic:
-+        if self.dynamic or builddirs[0].find("iphone") != -1 or builddirs[0].find("vision") != -1:
-             resdir = dstdir
-             shutil.copyfile(self.getInfoPlist(builddirs), os.path.join(resdir, "Info.plist"))
-         else:
 @@ -484,6 +490,24 @@ class Builder:
          shutil.copyfile(os.path.join(CURRENT_FILE_DIR, "PrivacyInfo.xcprivacy"),
                          os.path.join(resdir, "PrivacyInfo.xcprivacy"))
