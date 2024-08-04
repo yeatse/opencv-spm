@@ -45,7 +45,7 @@ jobs:
           IPHONEOS_DEPLOYMENT_TARGET: 12.0
           MACOSX_DEPLOYMENT_TARGET: 10.13
         run: |
-          git apply $GITHUB_WORKSPACE/opencv-spm/opencv.patch
+          git apply $GITHUB_WORKSPACE/opencv-spm/patches/*.patch
           pip3 install pathlib
           python3 platforms/apple/build_xcframework.py \
               --iphoneos_archs=arm64 \
