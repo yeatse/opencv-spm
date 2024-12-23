@@ -46,7 +46,7 @@ jobs:
         run: zip -ry opencv2.xcframework.zip build/opencv2.xcframework
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: gamechanger/upload-artifact-action@v1
         with:
           name: opencv2.xcframework.zip
           path: opencv/opencv2.xcframework.zip
