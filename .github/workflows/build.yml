@@ -51,7 +51,7 @@ jobs:
               --iphoneos_archs=arm64 \
               --visionos_archs=arm64 \
               --visionsimulator_archs=arm64 \
-              --disable-bitcode -o build
+              -o build
 
       - name: Zip artifact
         working-directory: opencv
