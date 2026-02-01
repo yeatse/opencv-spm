@@ -1,0 +1,13 @@
+diff --git forkSrcPrefix/platforms/osx/Info.plist.in forkDstPrefix/platforms/osx/Info.plist.in
+index a166934bdf020175cbe9a8eb88787c306e6b4592..fa70c2934907f8ab09db7046bce9f9debc59d739 100644
+--- forkSrcPrefix/platforms/osx/Info.plist.in
++++ forkDstPrefix/platforms/osx/Info.plist.in
+@@ -2,6 +2,8 @@
+ <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+ <plist version="1.0">
+ <dict>
++    <key>CFBundleExecutable</key>
++    <string>opencv2</string>
+     <key>CFBundleName</key>
+     <string>${OPENCV_APPLE_BUNDLE_NAME}</string>
+     <key>CFBundleIdentifier</key>

@@ -1,15 +1,15 @@
-// swift-tools-version: 5.7
+// swift-tools-version: 5.9
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
 
-let version = "4.8.0"
-let checksum = "83d60791fb49b22a9c587d6aded426d213afcfc733a5439b050e5dddd2706292"
+let version = "4.13.0"
+let checksum = "41fc3bf0f2af1660e24694a3e05d5c56e5869a133cea7084a7e262d54dd5b675"
 
 let package = Package(
     name: "opencv-spm",
     platforms: [
-        .macOS(.v10_13), .iOS(.v11), .macCatalyst(.v13)
+        .macOS(.v10_13), .iOS(.v12), .macCatalyst(.v13), .visionOS(.v1)
     ],
     products: [
         .library(
@@ -18,7 +18,7 @@ let package = Package(
     ],
     targets: [
         .binaryTarget(name: "opencv2",
-                      url: "https://github.com/gamechanger/opencv-spm/releases/download/\(version)/opencv2.xcframework.zip",
+                      url: "https://github.com/yeatse/opencv-spm/releases/download/\(version)/opencv2.xcframework.zip",
                       checksum: checksum),
         .target(
             name: "opencv2-dependencies",
@@ -26,8 +26,8 @@ let package = Package(
                 .linkedFramework("AVFoundation"),
                 .linkedFramework("CoreImage"),
                 .linkedFramework("CoreMedia"),
-                .linkedFramework("CoreVideo", .when(platforms: [.iOS])),
-                .linkedFramework("Accelerate", .when(platforms: [.iOS, .macOS])),
+                .linkedFramework("CoreVideo", .when(platforms: [.iOS, .visionOS])),
+                .linkedFramework("Accelerate", .when(platforms: [.iOS, .macOS, .visionOS])),
                 .linkedFramework("OpenCL", .when(platforms: [.macOS])),
                 .linkedLibrary("c++")
             ]

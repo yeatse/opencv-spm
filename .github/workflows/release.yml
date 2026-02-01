@@ -1,10 +1,5 @@
 name: Build and release a new version
-permissions:
-  pull-requests: write
-  issues: write
-  repository-projects: write
-  contents: write
-  packages: write
+
 on:
   push:
     branches: [ "main" ]
@@ -21,12 +16,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Download artifact
-        uses: gamechanger/download-artifact-action@v1
+        uses: actions/download-artifact@v4
         with:
           name: opencv2.xcframework.zip
 
@@ -45,13 +40,13 @@ jobs:
           sed -i "s/let version = \".*\"/let version = \"${{ steps.get_version.outputs.VERSION }}\"/" Package.swift
           sed -i "s/let checksum = \".*\"/let checksum = \"$(shasum -a 256 opencv2.xcframework.zip | cut -d ' ' -f 1)\"/" Package.swift
 
-      # - name: Commit and push
-      #   run: |
-      #     git config --local user.email "github-actions[bot]@users.noreply.github.com"
-      #     git config --local user.name "GitHub Actions"
-      #     git add Package.swift
-      #     git commit -m "Update Package.swift"
-      #     git push
+      - name: Commit and push
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "GitHub Actions"
+          git add Package.swift
+          git commit -m "Update Package.swift"
+          git push
 
       - name: Release
         uses: softprops/action-gh-release@v1

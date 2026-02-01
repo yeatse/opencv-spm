@@ -1,0 +1,37 @@
+diff --git forkSrcPrefix/platforms/ios/Info.plist.in forkDstPrefix/platforms/ios/Info.plist.in
+index a166934bdf020175cbe9a8eb88787c306e6b4592..76ab8fda4f6991b073d38c44a87bfa5d7901514c 100644
+--- forkSrcPrefix/platforms/ios/Info.plist.in
++++ forkDstPrefix/platforms/ios/Info.plist.in
+@@ -2,6 +2,10 @@
+ <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+ <plist version="1.0">
+ <dict>
++    <key>CFBundleExecutable</key>
++    <string>opencv2</string>
++    <key>MinimumOSVersion</key>
++    <string>100.0</string>
+     <key>CFBundleName</key>
+     <string>${OPENCV_APPLE_BUNDLE_NAME}</string>
+     <key>CFBundleIdentifier</key>
+diff --git forkSrcPrefix/platforms/ios/build_framework.py forkDstPrefix/platforms/ios/build_framework.py
+index b59eef1e03d8ef6b7920df7159b9fd0e0aafbdee..04b5408242e4f6642bfe1aaca3c6b964564c4a7d 100755
+--- forkSrcPrefix/platforms/ios/build_framework.py
++++ forkDstPrefix/platforms/ios/build_framework.py
+@@ -410,7 +410,7 @@ class Builder:
+             shutil.rmtree(framework_dir)
+         os.makedirs(framework_dir)
+ 
+-        if self.dynamic:
++        if self.dynamic or builddirs[0].find("iphone") != -1 or builddirs[0].find("vision") != -1:
+             dstdir = framework_dir
+         else:
+             dstdir = os.path.join(framework_dir, "Versions", "A")
+@@ -465,7 +465,7 @@ class Builder:
+         execute(lipocmd)
+ 
+         # dynamic framework has different structure, just copy the Plist directly
+-        if self.dynamic:
++        if self.dynamic or builddirs[0].find("iphone") != -1 or builddirs[0].find("vision") != -1:
+             resdir = dstdir
+             shutil.copyfile(self.getInfoPlist(builddirs), os.path.join(resdir, "Info.plist"))
+         else:
