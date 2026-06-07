@@ -54,6 +54,14 @@ jobs:
           # if it returns empty, which happens on the detached HEAD left by a tag
           # checkout. Put HEAD on a named branch so the build can proceed.
           git checkout -b release
+          # Pre-seed OpenCV's download cache with KleidiCV. Its source is
+          # otherwise fetched from gitlab.arm.com at configure time, which
+          # intermittently fails on CI with an SSL connect error and disables
+          # the KleidiCV HAL acceleration (arm64 only). The vendored tarball is
+          # placed at the exact cache path ocv_download() checks, so no network
+          # access is needed and KleidiCV is reliably included.
+          mkdir -p .cache/kleidicv
+          cp "$GITHUB_WORKSPACE"/opencv-spm/vendor/kleidicv/b85a745bfe0e87e67e30be9533eb6b24-kleidicv-26.03.tar.gz .cache/kleidicv/
           pip3 install pathlib
           # Exclude the ptcloud module: its generated Obj-C binding declares a
           # `VolumeType` enum that collides with a macOS system typedef
