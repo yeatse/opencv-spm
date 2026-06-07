@@ -1,0 +1,13 @@
+diff --git a/platforms/osx/Info.plist.in b/platforms/osx/Info.plist.in
+index a166934..fa70c29 100644
+--- a/platforms/osx/Info.plist.in
++++ b/platforms/osx/Info.plist.in
+@@ -2,6 +2,8 @@
+ <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+ <plist version="1.0">
+ <dict>
++    <key>CFBundleExecutable</key>
++    <string>opencv2</string>
+     <key>CFBundleName</key>
+     <string>${OPENCV_APPLE_BUNDLE_NAME}</string>
+     <key>CFBundleIdentifier</key>
