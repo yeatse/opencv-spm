@@ -1,0 +1,16 @@
+diff --git a/platforms/ios/build_framework.py b/platforms/ios/build_framework.py
+index e1345aa..7130f01 100755
+--- a/platforms/ios/build_framework.py
++++ b/platforms/ios/build_framework.py
+@@ -103,7 +103,10 @@ class Builder:
+ 
+         xcode_ver = get_xcode_major()
+         xcode_supports_ios_32bit_arch = xcode_ver <= 13
+-        self.build_docs = xcode_ver >= 13
++        # Skip the DocC documentation build: it is not needed for the
++        # distributed xcframework and its `docbuild` step fails on CI with
++        # "Could not parse tapi version".
++        self.build_docs = False
+ 
+         # build each architecture separately
+         alltargets = []
