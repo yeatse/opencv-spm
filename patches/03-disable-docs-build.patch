@@ -1,0 +1,32 @@
+diff --git a/platforms/apple/build_xcframework.py b/platforms/apple/build_xcframework.py
+index 73d3807..c7f7e2c 100755
+--- a/platforms/apple/build_xcframework.py
++++ b/platforms/apple/build_xcframework.py
+@@ -167,6 +167,11 @@ if __name__ == "__main__":
+         for platform, build_folder in docs_build_folder_dict.items():
+             docs_src = "{}/docs".format(build_folder)
+             docs_dst = "{}/docs_{}".format(args.out, platform)
++            # Skip platforms whose documentation was not built (e.g. when the
++            # DocC build is disabled).
++            if not os.path.isdir(docs_src):
++                print("No documentation found at {}, skipping".format(docs_src))
++                continue
+             # Remove the docs folder if it exists
+             with contextlib.suppress(FileNotFoundError):
+                 shutil.rmtree(docs_dst)
+diff --git a/platforms/ios/build_framework.py b/platforms/ios/build_framework.py
+index e1345aa..7130f01 100755
+--- a/platforms/ios/build_framework.py
++++ b/platforms/ios/build_framework.py
+@@ -103,7 +103,10 @@ class Builder:
+ 
+         xcode_ver = get_xcode_major()
+         xcode_supports_ios_32bit_arch = xcode_ver <= 13
+-        self.build_docs = xcode_ver >= 13
++        # Skip the DocC documentation build: it is not needed for the
++        # distributed xcframework and its `docbuild` step fails on CI with
++        # "Could not parse tapi version".
++        self.build_docs = False
+ 
+         # build each architecture separately
+         alltargets = []

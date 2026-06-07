@@ -1,0 +1,12 @@
+diff --git a/platforms/ios/build_framework.py b/platforms/ios/build_framework.py
+index e1345aa..c7aca8e 100755
+--- a/platforms/ios/build_framework.py
++++ b/platforms/ios/build_framework.py
+@@ -218,6 +218,7 @@ class Builder:
+             "-DOPENCV_INCLUDE_INSTALL_PATH=include",
+             "-DOPENCV_3P_LIB_INSTALL_PATH=lib/3rdparty",
+             "-DFRAMEWORK_NAME=%s" % self.framework_name,
++            "-DCMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD=gnu++17",
+         ]
+         if self.dynamic:
+             args += [
