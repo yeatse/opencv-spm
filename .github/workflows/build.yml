@@ -45,7 +45,15 @@ jobs:
           IPHONEOS_DEPLOYMENT_TARGET: 12.0
           MACOSX_DEPLOYMENT_TARGET: 10.13
         run: |
-          git apply $GITHUB_WORKSPACE/opencv-spm/patches/*.patch
+          shopt -s nullglob
+          patches=("$GITHUB_WORKSPACE"/opencv-spm/patches/*.patch)
+          if [ ${#patches[@]} -gt 0 ]; then
+            git apply "${patches[@]}"
+          fi
+          # OpenCV 5.x's build scripts call `git branch --show-current` and abort
+          # if it returns empty, which happens on the detached HEAD left by a tag
+          # checkout. Put HEAD on a named branch so the build can proceed.
+          git checkout -b release
           pip3 install pathlib
           python3 platforms/apple/build_xcframework.py \
               --iphoneos_archs=arm64 \
