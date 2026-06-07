@@ -1,0 +1,13 @@
+diff --git a/modules/features/include/opencv2/features.hpp b/modules/features/include/opencv2/features.hpp
+index 55519cc..348f039 100644
+--- a/modules/features/include/opencv2/features.hpp
++++ b/modules/features/include/opencv2/features.hpp
+@@ -1320,7 +1320,7 @@ public:
+     @param backend DNN backend
+     @param target DNN target
+     */
+-    CV_WRAP static Ptr<LightGlueMatcher> create(const String& modelPath, float scoreThreshold = 0.0f, int backend = 0, int target = 0);
++    CV_WRAP_AS(createFromFile) static Ptr<LightGlueMatcher> create(const String& modelPath, float scoreThreshold = 0.0f, int backend = 0, int target = 0);
+ 
+ #ifdef HAVE_OPENCV_DNN
+     /** @brief Creates LightGlueMatcher from in-memory model data.
