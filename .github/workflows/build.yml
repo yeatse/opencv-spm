@@ -55,10 +55,16 @@ jobs:
           # checkout. Put HEAD on a named branch so the build can proceed.
           git checkout -b release
           pip3 install pathlib
+          # Exclude the ptcloud module: its generated Obj-C binding declares a
+          # `VolumeType` enum that collides with a macOS system typedef
+          # (OSType VolumeType from CoreServices), breaking the macOS Obj-C
+          # module build. ptcloud has no dependents and was not shipped in the
+          # 4.x releases. (--without is forwarded as -DBUILD_opencv_ptcloud=OFF.)
           python3 platforms/apple/build_xcframework.py \
               --iphoneos_archs=arm64 \
               --visionos_archs=arm64 \
               --visionsimulator_archs=arm64 \
+              --without ptcloud \
               -o build
 
       - name: Zip artifact
