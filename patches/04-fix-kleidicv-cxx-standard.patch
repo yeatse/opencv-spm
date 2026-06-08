@@ -6,7 +6,7 @@ index e1345aa..c7aca8e 100755
              "-DOPENCV_INCLUDE_INSTALL_PATH=include",
              "-DOPENCV_3P_LIB_INSTALL_PATH=lib/3rdparty",
              "-DFRAMEWORK_NAME=%s" % self.framework_name,
-+            "-DCMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD=gnu++17",
++            "-DCMAKE_XCODE_ATTRIBUTE_CLANG_CXX_LANGUAGE_STANDARD=c++17",
          ]
          if self.dynamic:
              args += [
