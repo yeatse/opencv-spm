@@ -10,6 +10,26 @@ Add `https://github.com/yeatse/opencv-spm.git` to your package dependencies
 
 ![add dependency](screenshots/add%20dependency.png)
 
+## Choosing a build
+
+OpenCV ships a lot of modules, and bundling all of them makes the binary large
+even though most apps only use a fraction. This package therefore offers three
+prebuilt tiers as separate products. **Pick exactly one** — they all expose the
+same `opencv2` module, so `import opencv2` and your code stay identical no matter
+which one you choose.
+
+| Product | Modules included | Use when |
+| --- | --- | --- |
+| `OpenCV` | Everything (incl. `dnn`, `ptcloud`) | You need deep-learning inference or the full feature set |
+| `OpenCV-NoDNN` | Everything except `dnn` | Classic computer vision without neural-network inference (`dnn` is by far the largest module) |
+| `OpenCV-Core` | `core`, `imgproc`, `imgcodecs`, `geometry` | Basic image loading and processing only |
+
+If you're unsure, start with `OpenCV-NoDNN`; move down to `OpenCV-Core` if you
+only need image processing, or up to `OpenCV` if you need `dnn`.
+
+> Note: `stitching` and `highgui` have no Objective-C/Swift bindings and are not
+> callable from Swift in any tier.
+
 ## Usage
 
 Import `opencv2` and use it as documented in [opencv.org](opencv.org). For example, a swift version of [Extract horizontal and vertical lines by using morphological operations](https://docs.opencv.org/4.6.0/dd/dd7/tutorial_morph_lines_detection.html):

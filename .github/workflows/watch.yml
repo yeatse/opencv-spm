@@ -1,9 +1,11 @@
 name: Synchonize OpenCV version
 
+# NOTE: auto-sync is disabled. The build is pinned to a specific commit on the
+# 5.x branch via .opencv-ref (required ptcloud / KleidiCV fixes landed after the
+# 5.0.0 tag). Tracking opencv's `releases/latest` would overwrite that pin with
+# the 5.0.0 tag, so the schedule trigger is removed and version bumps are manual:
+# update .opencv-ref (and .version) by hand. Kept dispatchable for reference.
 on:
-  schedule:
-    - cron: '6 3 * * *'
-  
   workflow_dispatch:
 
 jobs:
@@ -14,7 +16,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.PUSH_TO_OPENCV_SPM }}
-      
+
       - name: Fetch OpenCV latest version
         run: |
           curl -s https://api.github.com/repos/opencv/opencv/releases/latest | jq -r '.tag_name' > .version

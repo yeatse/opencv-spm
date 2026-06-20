@@ -3,14 +3,14 @@ name: Build and release a new version
 on:
   push:
     branches: [ "main" ]
-    paths: [ ".version" ]
+    paths: [ ".version", ".opencv-ref" ]
 
   workflow_dispatch:
 
 jobs:
   build:
     uses: ./.github/workflows/build.yml
-          
+
   release:
     needs: build
     runs-on: ubuntu-latest
@@ -20,10 +20,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Download artifact
+      - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
-          name: opencv2.xcframework.zip
+          path: artifacts
+          merge-multiple: true
 
       - name: Get version
         id: get_version
@@ -37,8 +38,11 @@ jobs:
 
       - name: Update Package.swift
         run: |
+          checksum() { shasum -a 256 "artifacts/opencv2-$1.xcframework.zip" | cut -d ' ' -f 1; }
           sed -i "s/let version = \".*\"/let version = \"${{ steps.get_version.outputs.VERSION }}\"/" Package.swift
-          sed -i "s/let checksum = \".*\"/let checksum = \"$(shasum -a 256 opencv2.xcframework.zip | cut -d ' ' -f 1)\"/" Package.swift
+          sed -i "s/let coreChecksum = \".*\"/let coreChecksum = \"$(checksum core)\"/" Package.swift
+          sed -i "s/let nodnnChecksum = \".*\"/let nodnnChecksum = \"$(checksum nodnn)\"/" Package.swift
+          sed -i "s/let fullChecksum = \".*\"/let fullChecksum = \"$(checksum full)\"/" Package.swift
 
       - name: Commit and push
         run: |
@@ -51,5 +55,8 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          files: opencv2.xcframework.zip
+          files: |
+            artifacts/opencv2-core.xcframework.zip
+            artifacts/opencv2-nodnn.xcframework.zip
+            artifacts/opencv2-full.xcframework.zip
           tag_name: ${{ steps.get_version.outputs.VERSION }}

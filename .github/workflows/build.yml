@@ -8,6 +8,26 @@ jobs:
   build:
     runs-on: macos-14
 
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Minimal: core image handling only (core, imgproc, imgcodecs,
+          # geometry + its flann dependency).
+          - tier: core
+            without: >-
+              --without dnn --without calib --without objdetect
+              --without features --without stereo --without video
+              --without photo --without videoio --without stitching
+              --without highgui --without ptcloud
+          # Everything except the deep-learning module, which dominates the
+          # binary size. dnn has no mandatory dependents, so dropping it is clean.
+          - tier: nodnn
+            without: "--without dnn"
+          # Full build: every module, including ptcloud.
+          - tier: full
+            without: ""
+
     steps:
       - name: Prepare Xcode
         run: |
@@ -25,20 +45,23 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.10' 
+          python-version: '3.10'
 
-      - name: Get version
-        id: get_version
+      - name: Get OpenCV ref
+        id: get_ref
         working-directory: opencv-spm
-        run: echo "VERSION=$(cat .version)" >> $GITHUB_OUTPUT
+        run: echo "REF=$(cat .opencv-ref)" >> $GITHUB_OUTPUT
 
       - name: Checkout OpenCV
         uses: actions/checkout@v4
         with:
           repository: opencv/opencv
-          ref: refs/tags/${{ steps.get_version.outputs.VERSION }}
+          # Pinned to a commit on the 5.x branch (see opencv-spm/.opencv-ref).
+          # The required ptcloud and KleidiCV C++17 fixes landed after the
+          # 5.0.0 tag, so we build from a pinned 5.x commit rather than a tag.
+          ref: ${{ steps.get_ref.outputs.REF }}
           path: 'opencv'
-      
+
       - name: Build xcframework
         working-directory: opencv
         env:
@@ -51,8 +74,8 @@ jobs:
             git apply "${patches[@]}"
           fi
           # OpenCV 5.x's build scripts call `git branch --show-current` and abort
-          # if it returns empty, which happens on the detached HEAD left by a tag
-          # checkout. Put HEAD on a named branch so the build can proceed.
+          # if it returns empty, which happens on the detached HEAD left by a
+          # commit checkout. Put HEAD on a named branch so the build can proceed.
           git checkout -b release
           # Pre-seed OpenCV's download cache with KleidiCV. Its source is
           # otherwise fetched from gitlab.arm.com at configure time, which
@@ -63,25 +86,23 @@ jobs:
           mkdir -p .cache/kleidicv
           cp "$GITHUB_WORKSPACE"/opencv-spm/vendor/kleidicv/b85a745bfe0e87e67e30be9533eb6b24-kleidicv-26.03.tar.gz .cache/kleidicv/
           pip3 install pathlib
-          # Exclude the ptcloud module: its generated Obj-C binding declares a
-          # `VolumeType` enum that collides with a macOS system typedef
-          # (OSType VolumeType from CoreServices), breaking the macOS Obj-C
-          # module build. ptcloud has no dependents and was not shipped in the
-          # 4.x releases. (--without is forwarded as -DBUILD_opencv_ptcloud=OFF.)
+          # Module set per tier is selected via --without (a blacklist; anything
+          # not excluded is built, and excluding a module auto-disables its
+          # dependents). See the matrix above.
           python3 platforms/apple/build_xcframework.py \
               --iphoneos_archs=arm64 \
               --visionos_archs=arm64 \
               --visionsimulator_archs=arm64 \
-              --without ptcloud \
+              ${{ matrix.without }} \
               -o build
 
       - name: Zip artifact
         working-directory: opencv
-        run: zip -ry opencv2.xcframework.zip build/opencv2.xcframework
+        run: zip -ry opencv2-${{ matrix.tier }}.xcframework.zip build/opencv2.xcframework
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: opencv2.xcframework.zip
-          path: opencv/opencv2.xcframework.zip
+          name: opencv2-${{ matrix.tier }}
+          path: opencv/opencv2-${{ matrix.tier }}.xcframework.zip
           if-no-files-found: error
