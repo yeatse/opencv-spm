@@ -2,23 +2,33 @@ name: Build and release a new version
 
 on:
   push:
-    branches: [ "main" ]
-    paths: [ ".version", ".opencv-ref" ]
+    tags:
+      - "*"
 
   workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to package and release"
+        required: true
+        type: string
 
 jobs:
   build:
     uses: ./.github/workflows/build.yml
+    with:
+      checkout_ref: ${{ github.event.inputs.tag || github.ref }}
 
   release:
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: ${{ github.event.inputs.tag || github.ref }}
 
       - name: Download artifacts
         uses: actions/download-artifact@v4
@@ -26,37 +36,34 @@ jobs:
           path: artifacts
           merge-multiple: true
 
-      - name: Get version
-        id: get_version
+      - name: Resolve release tag
+        id: release_tag
         run: |
-          VERSION=$(cat .version)
-          if git rev-parse -q --verify "refs/tags/${VERSION}" >/dev/null; then
-            PATCH=$(git rev-list --count "refs/tags/${VERSION}..HEAD")
-            VERSION="${VERSION}+${PATCH}"
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            tag="${{ github.event.inputs.tag }}"
+          else
+            tag="${GITHUB_REF_NAME}"
           fi
-          echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
+          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
 
-      - name: Update Package.swift
+      - name: Update Package.swift for validation
         run: |
-          checksum() { shasum -a 256 "artifacts/opencv2-$1.xcframework.zip" | cut -d ' ' -f 1; }
-          sed -i "s/let version = \".*\"/let version = \"${{ steps.get_version.outputs.VERSION }}\"/" Package.swift
-          sed -i "s/let coreChecksum = \".*\"/let coreChecksum = \"$(checksum core)\"/" Package.swift
-          sed -i "s/let nodnnChecksum = \".*\"/let nodnnChecksum = \"$(checksum nodnn)\"/" Package.swift
-          sed -i "s/let fullChecksum = \".*\"/let fullChecksum = \"$(checksum full)\"/" Package.swift
+          set -euo pipefail
+          version="${{ steps.release_tag.outputs.tag }}"
+          sed -i "s/let version = \".*\"/let version = \"${version}\"/" Package.swift
 
-      - name: Commit and push
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "GitHub Actions"
-          git add Package.swift
-          git commit -m "Update Package.swift"
-          git push
+          for tier in core nodnn full; do
+            artifact="artifacts/opencv2-${tier}.xcframework.zip"
+            checksum=$(shasum -a 256 "$artifact" | cut -d ' ' -f 1)
+            constant="${tier}Checksum"
+            sed -i "s/let ${constant} = \".*\"/let ${constant} = \"${checksum}\"/" Package.swift
+          done
+
+      - name: Validate Package.swift has release URLs and checksums
+        run: swift package dump-package >/dev/null
 
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          files: |
-            artifacts/opencv2-core.xcframework.zip
-            artifacts/opencv2-nodnn.xcframework.zip
-            artifacts/opencv2-full.xcframework.zip
-          tag_name: ${{ steps.get_version.outputs.VERSION }}
+          files: artifacts/*.xcframework.zip
+          tag_name: ${{ steps.release_tag.outputs.tag }}
