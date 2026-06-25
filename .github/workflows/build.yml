@@ -2,7 +2,16 @@ name: Build OpenCV xcframework
 
 on:
   workflow_dispatch:
+    inputs:
+      checkout_ref:
+        description: "opencv-spm ref to check out"
+        required: false
+        type: string
   workflow_call:
+    inputs:
+      checkout_ref:
+        required: false
+        type: string
 
 jobs:
   build:
@@ -42,6 +51,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: opencv-spm
+          ref: ${{ inputs.checkout_ref || github.ref }}
 
       - uses: actions/setup-python@v5
         with:
@@ -62,43 +72,18 @@ jobs:
           ref: ${{ steps.get_ref.outputs.REF }}
           path: 'opencv'
 
-      - name: Build xcframework
+      - name: Build and zip xcframework
         working-directory: opencv
         env:
           IPHONEOS_DEPLOYMENT_TARGET: 12.0
           MACOSX_DEPLOYMENT_TARGET: 10.13
         run: |
-          shopt -s nullglob
-          patches=("$GITHUB_WORKSPACE"/opencv-spm/patches/*.patch)
-          if [ ${#patches[@]} -gt 0 ]; then
-            git apply "${patches[@]}"
-          fi
-          # OpenCV 5.x's build scripts call `git branch --show-current` and abort
-          # if it returns empty, which happens on the detached HEAD left by a
-          # commit checkout. Put HEAD on a named branch so the build can proceed.
-          git checkout -b release
-          # Pre-seed OpenCV's download cache with KleidiCV. Its source is
-          # otherwise fetched from gitlab.arm.com at configure time, which
-          # intermittently fails on CI with an SSL connect error and disables
-          # the KleidiCV HAL acceleration (arm64 only). The vendored tarball is
-          # placed at the exact cache path ocv_download() checks, so no network
-          # access is needed and KleidiCV is reliably included.
-          mkdir -p .cache/kleidicv
-          cp "$GITHUB_WORKSPACE"/opencv-spm/vendor/kleidicv/b85a745bfe0e87e67e30be9533eb6b24-kleidicv-26.03.tar.gz .cache/kleidicv/
-          pip3 install pathlib
           # Module set per tier is selected via --without (a blacklist; anything
           # not excluded is built, and excluding a module auto-disables its
           # dependents). See the matrix above.
-          python3 platforms/apple/build_xcframework.py \
-              --iphoneos_archs=arm64 \
-              --visionos_archs=arm64 \
-              --visionsimulator_archs=arm64 \
-              ${{ matrix.without }} \
-              -o build
-
-      - name: Zip artifact
-        working-directory: opencv
-        run: zip -ry opencv2-${{ matrix.tier }}.xcframework.zip build/opencv2.xcframework
+          "$GITHUB_WORKSPACE"/opencv-spm/scripts/build-opencv-xcframework.sh \
+            "${{ matrix.tier }}" \
+            ${{ matrix.without }}
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
