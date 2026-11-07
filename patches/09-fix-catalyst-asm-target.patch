@@ -1,0 +1,37 @@
+diff --git a/3rdparty/mlas/CMakeLists.txt b/3rdparty/mlas/CMakeLists.txt
+index 4be3cd370e..a156d820f2 100644
+--- a/3rdparty/mlas/CMakeLists.txt
++++ b/3rdparty/mlas/CMakeLists.txt
+@@ -297,6 +297,17 @@ if(MLAS_WASM OR NOT (MLAS_X86 OR MLAS_X86_64 OR MLAS_ARM OR MLAS_ARM64
+   list(APPEND mlas_platform_srcs ${MLAS_SRC_DIR}/scalar/SgemmKernelScalar.cpp)
+ endif()
+ 
++# The Xcode generator does not pass CMAKE_ASM_FLAGS to assembly sources, so
++# flags such as the Mac Catalyst `-target <arch>-apple-ios*-macabi` would be
++# dropped and the .S objects built for macOS instead. Attach them per file.
++if(CMAKE_GENERATOR STREQUAL "Xcode" AND CMAKE_ASM_FLAGS)
++  foreach(_mlas_src ${mlas_platform_srcs})
++    if(_mlas_src MATCHES "\\.S$")
++      set_property(SOURCE ${_mlas_src} APPEND_STRING PROPERTY COMPILE_FLAGS " ${CMAKE_ASM_FLAGS}")
++    endif()
++  endforeach()
++endif()
++
+ add_library(opencv_dnn_mlas OBJECT ${mlas_common_srcs} ${mlas_platform_srcs})
+ set_target_properties(opencv_dnn_mlas PROPERTIES POSITION_INDEPENDENT_CODE ON)
+ target_include_directories(opencv_dnn_mlas PUBLIC  ${MLAS_INC_DIR})
+diff --git a/platforms/ios/build_framework.py b/platforms/ios/build_framework.py
+index 2937267419..a868e309a7 100755
+--- a/platforms/ios/build_framework.py
++++ b/platforms/ios/build_framework.py
+@@ -133,6 +133,10 @@ class Builder:
+                 ]
+                 cmake_flags.append("-DCMAKE_C_FLAGS=" + " ".join(c_flags))
+                 cmake_flags.append("-DCMAKE_CXX_FLAGS=" + " ".join(c_flags))
++                # Assembly sources (e.g. the vendored MLAS kernels) need the
++                # Catalyst target too, otherwise they are built for macOS and
++                # the mixed-platform archive breaks `-create-xcframework`.
++                cmake_flags.append("-DCMAKE_ASM_FLAGS=" + " ".join(c_flags))
+                 cmake_flags.append("-DCMAKE_EXE_LINKER_FLAGS=" + " ".join(c_flags))
+ 
+                 # CMake cannot compile Swift for Catalyst https://gitlab.kitware.com/cmake/cmake/-/issues/21436

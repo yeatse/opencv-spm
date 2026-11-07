@@ -3,7 +3,7 @@ name: Build and release a new version
 on:
   push:
     branches: [ "main" ]
-    paths: [ ".version", ".opencv-ref" ]
+    paths: [ ".version" ]
 
   workflow_dispatch:
 

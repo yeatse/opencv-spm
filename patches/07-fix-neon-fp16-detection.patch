@@ -1,0 +1,43 @@
+diff --git a/modules/core/src/system.cpp b/modules/core/src/system.cpp
+index 47c922cbad..0628bf63f2 100644
+--- a/modules/core/src/system.cpp
++++ b/modules/core/src/system.cpp
+@@ -710,8 +710,17 @@ struct HWFeatures
+         have[CV_CPU_NEON] = true;
+     #endif
+     #if (defined __ARM_FP  && (((__ARM_FP & 0x2) != 0) && defined __ARM_NEON))
+-        have[CV_CPU_FP16] = have[CV_CPU_NEON_FP16] = true;
++        have[CV_CPU_FP16] = true;
+     #endif
++    // __ARM_FP only reports half-precision *conversion* support, which every
++    // arm64 Apple CPU has. FP16 *arithmetic* (NEON_FP16) requires FEAT_FP16
++    // (A11 and later), so query the hardware, like DotProd/BF16 below.
++    int has_feat_fp16 = 0;
++    size_t has_feat_fp16_size = sizeof(has_feat_fp16);
++    sysctlbyname("hw.optional.arm.FEAT_FP16", &has_feat_fp16, &has_feat_fp16_size, NULL, 0);
++    if (has_feat_fp16) {
++        have[CV_CPU_NEON_FP16] = true;
++    }
+     // system.cpp may be compiled w/o special -march=armv8...+dotprod, -march=armv8...+bf16 etc.,
+     // so we check for the features in any case, no mater what are the compile flags.
+     // We check the real hardware capabilities here.
+diff --git a/platforms/ios/cmake/Toolchains/common-ios-toolchain.cmake b/platforms/ios/cmake/Toolchains/common-ios-toolchain.cmake
+index 7a14529c2d..c4e0edc360 100644
+--- a/platforms/ios/cmake/Toolchains/common-ios-toolchain.cmake
++++ b/platforms/ios/cmake/Toolchains/common-ios-toolchain.cmake
+@@ -130,6 +130,15 @@ if((VISIONOS OR VISIONSIMULATOR) AND NOT DEFINED XROS_DEPLOYMENT_TARGET)
+   set(DEPLOYMENT_TARGET_CMDLINE "XROS_DEPLOYMENT_TARGET=${XROS_DEPLOYMENT_TARGET}")
+ endif()
+ 
++# Propagate the deployment target into the generated Xcode projects, including
++# the try_compile() projects used for CPU feature detection. Otherwise those
++# checks target the SDK's latest OS version, for which newer clang selects a
++# newer default CPU (e.g. with fullfp16), and features get detected as baseline
++# that the real, lower deployment target does not support.
++if(DEPLOYMENT_TARGET AND NOT CMAKE_OSX_DEPLOYMENT_TARGET)
++  set(CMAKE_OSX_DEPLOYMENT_TARGET "${DEPLOYMENT_TARGET}")
++endif()
++
+ if(NOT __IN_TRY_COMPILE)
+   set(_xcodebuild_wrapper "")
+   if(NOT (CMAKE_VERSION VERSION_LESS "3.25.1"))  # >= 3.25.1

@@ -23,7 +23,7 @@ func opencvTarget(name: String, checksum: String) -> Target {
 let package = Package(
     name: "OpenCV",
     platforms: [
-        .macOS(.v10_13), .iOS(.v12), .macCatalyst(.v13), .visionOS(.v1)
+        .macOS(.v12), .iOS(.v15), .macCatalyst(.v15), .visionOS(.v1)
     ],
     products: [
         // Full build — every module, including dnn and ptcloud.

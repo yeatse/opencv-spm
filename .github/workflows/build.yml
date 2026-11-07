@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    runs-on: macos-14
+    runs-on: macos-26
 
     strategy:
       fail-fast: false
@@ -29,10 +29,6 @@ jobs:
             without: ""
 
     steps:
-      - name: Prepare Xcode
-        run: |
-          sudo xcode-select -s /Applications/Xcode_15.2.app/Contents/Developer
-
       - name: actions-setup-cmake
         uses: jwlawson/actions-setup-cmake@v1.13.1
         with:
@@ -47,26 +43,23 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Get OpenCV ref
-        id: get_ref
+      - name: Get version
+        id: get_version
         working-directory: opencv-spm
-        run: echo "REF=$(cat .opencv-ref)" >> $GITHUB_OUTPUT
+        run: echo "VERSION=$(cat .version)" >> $GITHUB_OUTPUT
 
       - name: Checkout OpenCV
         uses: actions/checkout@v4
         with:
           repository: opencv/opencv
-          # Pinned to a commit on the 5.x branch (see opencv-spm/.opencv-ref).
-          # The required ptcloud and KleidiCV C++17 fixes landed after the
-          # 5.0.0 tag, so we build from a pinned 5.x commit rather than a tag.
-          ref: ${{ steps.get_ref.outputs.REF }}
+          ref: ${{ steps.get_version.outputs.VERSION }}
           path: 'opencv'
 
       - name: Build xcframework
         working-directory: opencv
         env:
-          IPHONEOS_DEPLOYMENT_TARGET: 12.0
-          MACOSX_DEPLOYMENT_TARGET: 10.13
+          IPHONEOS_DEPLOYMENT_TARGET: 15.0
+          MACOSX_DEPLOYMENT_TARGET: 12.0
         run: |
           shopt -s nullglob
           patches=("$GITHUB_WORKSPACE"/opencv-spm/patches/*.patch)
@@ -75,7 +68,7 @@ jobs:
           fi
           # OpenCV 5.x's build scripts call `git branch --show-current` and abort
           # if it returns empty, which happens on the detached HEAD left by a
-          # commit checkout. Put HEAD on a named branch so the build can proceed.
+          # tag checkout. Put HEAD on a named branch so the build can proceed.
           git checkout -b release
           # Pre-seed OpenCV's download cache with KleidiCV. Its source is
           # otherwise fetched from gitlab.arm.com at configure time, which
@@ -84,7 +77,7 @@ jobs:
           # placed at the exact cache path ocv_download() checks, so no network
           # access is needed and KleidiCV is reliably included.
           mkdir -p .cache/kleidicv
-          cp "$GITHUB_WORKSPACE"/opencv-spm/vendor/kleidicv/b85a745bfe0e87e67e30be9533eb6b24-kleidicv-26.03.tar.gz .cache/kleidicv/
+          cp "$GITHUB_WORKSPACE"/opencv-spm/vendor/kleidicv/77bb081492b2aa68033d7a848987252b-kleidicv-26.09.tar.gz .cache/kleidicv/
           pip3 install pathlib
           # Module set per tier is selected via --without (a blacklist; anything
           # not excluded is built, and excluding a module auto-disables its
