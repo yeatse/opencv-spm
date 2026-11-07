@@ -3,14 +3,14 @@
 
 import PackageDescription
 
-let version = "5.0.0"
+let version = "5.1.0"
 
 // One checksum per prebuilt tier. All three xcframeworks expose the same
 // `opencv2` module, so consumer code (`import opencv2`) is identical regardless
 // of the tier chosen — pick exactly ONE product below.
-let coreChecksum = "2c99ce47c7bf43e74f1ecc8759614c07fa1faf98fb830b1feacfae1313b76552"
-let nodnnChecksum = "2c99ce47c7bf43e74f1ecc8759614c07fa1faf98fb830b1feacfae1313b76552"
-let fullChecksum = "2c99ce47c7bf43e74f1ecc8759614c07fa1faf98fb830b1feacfae1313b76552"
+let coreChecksum = "0350e27267fc1baa6bf2f64ac881ccfb3e3d4842a134780868bb7c5e7d05bd00"
+let nodnnChecksum = "27344bad99b8b0579987f4c937baeaeed5d4a220efc511c9dc8e7a2b54e35869"
+let fullChecksum = "bfce255932567df757a82ef29b72bda0f606c717279ab953b7d54e489af85a6e"
 
 func opencvTarget(name: String, checksum: String) -> Target {
     .binaryTarget(
